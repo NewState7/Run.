@@ -1,0 +1,264 @@
+-- ENEL FLY SCRIPT - Sea Stand Toggle + Speed 300-750 + Hide/Show GUI
+-- By ChatGPT (Optimized)
+
+--// Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+--// Variables
+local flying = false
+local flySpeed = 300
+local seaStand = true
+local camera = workspace.CurrentCamera
+
+--// ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "EnelFly"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+--// Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 160)
+mainFrame.Position = UDim2.new(0.35, 0, 0.4, 0)
+mainFrame.BackgroundTransparency = 0.15
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+-- UI Corner
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = mainFrame
+
+-- UI Stroke (Glowing border)
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2.5
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = mainFrame
+
+-- Glow border animation for mainFrame
+task.spawn(function()
+	while task.wait() do
+		for i = 0, 1, 0.02 do
+			stroke.Color = Color3.fromHSV(i, 1, 1)
+			task.wait()
+		end
+	end
+end)
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundTransparency = 1
+title.Text = "⚡ Enel"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = mainFrame
+
+-- Title glow animation
+task.spawn(function()
+	while task.wait() do
+		for i = 0, 1, 0.02 do
+			title.TextStrokeTransparency = i
+			title.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
+			task.wait()
+		end
+		for i = 1, 0, -0.02 do
+			title.TextStrokeTransparency = i
+			title.TextStrokeColor3 = Color3.fromRGB(0, 255, 255)
+			task.wait()
+		end
+	end
+end)
+
+-- Toggle Fly Button
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0.45, 0, 0, 30)
+toggleButton.Position = UDim2.new(0.05, 0, 0.35, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+toggleButton.Text = "Run: OFF"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 18
+toggleButton.Parent = mainFrame
+
+local cornerBtn = Instance.new("UICorner")
+cornerBtn.CornerRadius = UDim.new(0, 8)
+cornerBtn.Parent = toggleButton
+
+-- Speed Slider Button
+local speedSlider = Instance.new("TextButton")
+speedSlider.Size = UDim2.new(0.45, 0, 0, 30)
+speedSlider.Position = UDim2.new(0.5, 0, 0.35, 0)
+speedSlider.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+speedSlider.Text = "Speed: 300"
+speedSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedSlider.Font = Enum.Font.GothamBold
+speedSlider.TextSize = 18
+speedSlider.Parent = mainFrame
+
+local cornerSlider = Instance.new("UICorner")
+cornerSlider.CornerRadius = UDim.new(0, 8)
+cornerSlider.Parent = speedSlider
+
+-- Sea Toggle Button
+local seaToggle = Instance.new("TextButton")
+seaToggle.Size = UDim2.new(0.9, 0, 0, 30)
+seaToggle.Position = UDim2.new(0.05, 0, 0.7, 0)
+seaToggle.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+seaToggle.Text = "Sea: ON"
+seaToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+seaToggle.Font = Enum.Font.GothamBold
+seaToggle.TextSize = 18
+seaToggle.Parent = mainFrame
+
+local seaCorner = Instance.new("UICorner")
+seaCorner.CornerRadius = UDim.new(0, 8)
+seaCorner.Parent = seaToggle
+
+-- Hide GUI Button (round with glowing border)
+local hideGuiButton = Instance.new("TextButton")
+hideGuiButton.Size = UDim2.new(0, 40, 0, 40)
+hideGuiButton.Position = UDim2.new(0, -20, 0, -20) -- outside top-left of mainFrame
+hideGuiButton.BackgroundColor3 = Color3.fromRGB(20, 20, 50)
+hideGuiButton.Text = "⛔"
+hideGuiButton.TextColor3 = Color3.fromRGB(0, 255, 255)
+hideGuiButton.Font = Enum.Font.GothamBold
+hideGuiButton.TextSize = 24
+hideGuiButton.Parent = mainFrame
+
+local hideCorner = Instance.new("UICorner")
+hideCorner.CornerRadius = UDim.new(1, 0)
+hideCorner.Parent = hideGuiButton
+
+local hideStroke = Instance.new("UIStroke")
+hideStroke.Thickness = 2
+hideStroke.Parent = hideGuiButton
+
+-- Glow animation for hideGuiButton border
+task.spawn(function()
+	while task.wait(0.05) do
+		for i = 0, 1, 0.05 do
+			hideStroke.Color = Color3.fromHSV(i, 1, 1)
+			task.wait(0.05)
+		end
+	end
+end)
+
+-- Show GUI Button (round with glowing border) initially hidden
+local showGuiButton = Instance.new("TextButton")
+showGuiButton.Size = UDim2.new(0, 40, 0, 40)
+showGuiButton.Position = UDim2.new(0, 10, 0, 10) -- top-left corner of screenGui
+showGuiButton.BackgroundColor3 = Color3.fromRGB(20, 20, 50)
+showGuiButton.Text = "⚡"
+showGuiButton.TextColor3 = Color3.fromRGB(0, 255, 255)
+showGuiButton.Font = Enum.Font.GothamBold
+showGuiButton.TextSize = 24
+showGuiButton.Visible = false
+showGuiButton.Parent = screenGui
+
+local showCorner = Instance.new("UICorner")
+showCorner.CornerRadius = UDim.new(1, 0)
+showCorner.Parent = showGuiButton
+
+local showStroke = Instance.new("UIStroke")
+showStroke.Thickness = 2
+showStroke.Parent = showGuiButton
+
+-- Glow animation for showGuiButton border
+task.spawn(function()
+	while task.wait(0.05) do
+		for i = 0, 1, 0.05 do
+			showStroke.Color = Color3.fromHSV(i, 1, 1)
+			task.wait(0.05)
+		end
+	end
+end)
+
+-- Hide GUI button click
+hideGuiButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = false
+	hideGuiButton.Visible = false
+	showGuiButton.Visible = true
+end)
+
+-- Show GUI button click
+showGuiButton.MouseButton1Click:Connect(function()
+	mainFrame.Visible = true
+	hideGuiButton.Visible = true
+	showGuiButton.Visible = false
+end)
+
+-- Fly function
+local function setFlying(state)
+	flying = state
+	if state then
+		toggleButton.Text = "Run: ON"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+	else
+		toggleButton.Text = "Run: OFF"
+		toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	end
+end
+
+-- Sea Stand toggle
+seaToggle.MouseButton1Click:Connect(function()
+    seaStand = not seaStand
+    if seaStand then
+        seaToggle.Text = "Sea: ON"
+        seaToggle.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+    else
+        seaToggle.Text = "Sea: OFF"
+        seaToggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+    end
+end)
+
+-- Platform to stand on sea
+local waterPart = Instance.new("Part")
+waterPart.Size = Vector3.new(1000, 1, 1000)
+waterPart.Anchored = true
+waterPart.Transparency = 1
+waterPart.CanCollide = true
+waterPart.Parent = workspace
+
+-- Keep platform under player
+RunService.Heartbeat:Connect(function()
+	if seaStand and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local pos = LocalPlayer.Character.HumanoidRootPart.Position
+		waterPart.Position = Vector3.new(pos.X, -2, pos.Z)
+	else
+		waterPart.Position = Vector3.new(999999, -5000, 999999)
+	end
+end)
+
+-- Movement
+RunService.RenderStepped:Connect(function()
+	if flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+		local moveDirection = LocalPlayer.Character.Humanoid.MoveDirection
+		if moveDirection.Magnitude > 0 then
+			LocalPlayer.Character:TranslateBy(moveDirection * flySpeed / 100)
+		end
+	end
+end)
+
+-- Button events
+toggleButton.MouseButton1Click:Connect(function()
+	setFlying(not flying)
+end)
+
+speedSlider.MouseButton1Click:Connect(function()
+	if flySpeed >= 750 then
+		flySpeed = 300
+	else
+		flySpeed += 25
+	end
+	speedSlider.Text = "Speed: " .. flySpeed
+end)
+
+-- Default
+setFlying(false)
